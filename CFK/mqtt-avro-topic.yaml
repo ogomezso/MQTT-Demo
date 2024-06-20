@@ -1,0 +1,15 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: mqtt-avro
+  namespace: confluent
+spec:
+  replicas: 3
+  partitionCount: 1
+  kafkaRest:
+    endpoint: https://lkc-m5ogd2.dom1w4n19gl.westeurope.azure.confluent.cloud:443
+    kafkaClusterID: lkc-m5ogd2
+    authentication:
+      type: basic
+      basic:
+        secretRef: ccloud-rest-credentials

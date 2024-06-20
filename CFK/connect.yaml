@@ -1,0 +1,40 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-server-connect:7.6.1
+    init: confluentinc/confluent-init-container:2.8.2
+  configOverrides:
+    jvm:
+      - "-Duser.dir=/tmp/"
+  build:
+    type: onDemand
+    onDemand:
+      plugins:
+        locationType: confluentHub
+        confluentHub:
+          - name: kafka-connect-mqtt
+            owner: confluentinc
+            version: 1.7.0
+          - name: kafka-connect-datagen
+            owner: confluentinc
+            version: 0.4.0
+  dependencies:
+    kafka:
+      bootstrapEndpoint: lkc-m5ogd2.dom1w4n19gl.westeurope.azure.confluent.cloud:9092
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: ccloud-credentials
+      tls:
+        enabled: true
+        ignoreTrustStoreConfig: true 
+    schemaRegistry:
+      url: https://psrc-4kk0p.westeurope.azure.confluent.cloud
+      authentication:
+        type: basic
+        basic:
+          secretRef: ccloud-sr-credentials

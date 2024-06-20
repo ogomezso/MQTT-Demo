@@ -1,0 +1,19 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: hello-mqtt
+  namespace: confluent
+spec:
+  class: "io.confluent.connect.mqtt.MqttSourceConnector"
+  taskMax: 1
+  connectClusterRef:
+    name: connect
+  configs:
+    key.converter: "org.apache.kafka.connect.storage.StringConverter"
+    value.converter: "org.apache.kafka.connect.converters.ByteArrayConverter"
+    mqtt.topics: "hello,bye, test_java"
+    kafka.topic: hello
+    mqtt.server.uri: "tcp://20.238.230.187:1883"
+    mqtt.qos: "0"
+    mqtt.clean.session.enabled: "false"
