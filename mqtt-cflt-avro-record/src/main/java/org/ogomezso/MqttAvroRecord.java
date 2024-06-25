@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
-import org.eclipse.paho.client.mqttv3.MqttException;
 import org.ogomezso.msg.AvroMessage;
 
 public class MqttAvroRecord {
@@ -14,7 +13,7 @@ public class MqttAvroRecord {
 
     String topic = "cflt-record";
     String kafka_topic = "mqtt-avro";
-    String mqttBroker = "tcp://20.238.230.187:1883";
+    String mqttBroker = "20.238.230.187";
 
     Random rand = new Random();
     byte[] array = new byte[8];
@@ -39,12 +38,9 @@ public class MqttAvroRecord {
 
     System.out.println(Arrays.toString(record));
 
-    try {
-      EmqClient emqClient = new EmqClient(mqttBroker, topic);
-      emqClient.publish(topic, 0, record, false);
-    } catch (MqttException e) {
-      throw new RuntimeException(e);
-    }
+    EmqClient emqClient = new EmqClient(mqttBroker, topic);
+    emqClient.publish(topic, record, false, kafka_topic);
     System.exit(0);
+
   }
 }
