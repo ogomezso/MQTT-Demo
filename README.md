@@ -170,7 +170,7 @@ Starting Kafka Consumer. Use Ctrl-C to exit.
 % Headers: [mqtt.message.id="0" mqtt.qos="0" mqtt.retained="false" mqtt.duplicate="false"]
 ```
 
-#### AVRO MSG
+### AVRO MSG
 
 La carpeta `mqtt-cflt-avro-record` contiene un proyecto Java en el que hacemos uso del `KafkaAvroSerializer` configurado con los datos de acceso del cluster de Schema Registry en Confluent Cloud para serializar los mensajes que enviamos a `EMQX` siendo compatibles con la serialización confluent y por tanto usables desde el conector MQTT.
 
@@ -223,3 +223,57 @@ Starting Kafka Consumer. Use Ctrl-C to exit.
 {"temp":7,"station":"station9","time":920}
 % Headers: [mqtt.message.id="0" mqtt.qos="0" mqtt.retained="false" mqtt.duplicate="false"]
 ```
+
+### Enrutado de topics en base a cabeceras
+
+El objetivo de la funcionalidad es que el conector MQTT sea capaz de producir cada mensaje MQTT en el topic Kafka adecuado usando para ello el contenido de la cabecera `topicName` que contiene el nombre del topic kafka destino.
+
+Para ello usaremos la SMT `io.confluent.connect.transforms.ExtractTopic$Header`.
+
+Por tanto necesitaremos instalar el plugin `connect-transforms`, añadiendolo a la cláusula build del CR de connect:
+
+```yaml
+  build:
+    type: onDemand
+    onDemand:
+      plugins:
+        locationType: confluentHub
+        confluentHub:
+          - name: kafka-connect-mqtt
+            owner: confluentinc
+            version: 1.7.0
+          - name: kafka-connect-datagen
+            owner: confluentinc
+            version: 0.4.0
+          - name: connect-transforms
+            owner: confluentinc
+            version: latest
+```
+
+A partir de aquí podemos usarlo facilmente en la configuración de nuestro conector:
+
+```yaml
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: mqtt-avro
+  namespace: confluent
+spec:
+  class: "io.confluent.connect.mqtt.MqttSourceConnector"
+  taskMax: 1
+  connectClusterRef:
+    name: connect
+  configs:
+    key.converter: "org.apache.kafka.connect.storage.StringConverter"
+    value.converter: "org.apache.kafka.connect.converters.ByteArrayConverter"
+    mqtt.topics: "cflt-record"
+    kafka.topic: "best-topic-ever"
+    mqtt.server.uri: "tcp://20.238.230.187:1883"
+    mqtt.qos: "0"
+    mqtt.clean.session.enabled: "false"
+    transforms: "TopicName"
+    transforms.TopicName.type: "io.confluent.connect.transforms.ExtractTopic$Header"
+    transforms.TopicName.field: "topicName"
+```
+

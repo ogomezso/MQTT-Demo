@@ -13,7 +13,7 @@ public class MqttAvroRecord {
 
     String topic = "cflt-record";
     String kafka_topic = "mqtt-avro";
-    String mqttBroker = "20.238.230.187";
+    String mqttBroker = "57.153.131.149";
 
     Random rand = new Random();
     byte[] array = new byte[8];
